@@ -764,7 +764,8 @@ func getIsuGraph(c echo.Context) error {
 	var lastUpdate time.Time
 	err = db.Select(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "bad format: datetime")
+		c.Logger().Errorf("db error: %v", err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	tx, err := db.Beginx()
