@@ -759,8 +759,6 @@ func getIsuGraph(c echo.Context) error {
 	}
 	date := time.Unix(datetimeInt64, 0).Truncate(time.Hour)
 
-	log.Infof("!!! %v", c.Request().Header)
-
 	var lastUpdate time.Time
 	err = db.Get(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
 	if err != nil {
@@ -771,12 +769,9 @@ func getIsuGraph(c echo.Context) error {
 	ims := c.Request().Header.Get("if-modified-since")
 	imsTime, err := http.ParseTime(ims)
 	if err == nil {
-		c.Logger().Infof("!!! lastUpdate: %v, imsTime: %v", lastUpdate, imsTime)
 		if !lastUpdate.After(imsTime) {
 			return c.NoContent(304)
 		}
-	} else {
-		c.Logger().Errorf("!!! error: %v", err)
 	}
 
 	tx, err := db.Beginx()
