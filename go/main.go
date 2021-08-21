@@ -210,8 +210,8 @@ func init() {
 
 func main() {
 	e := echo.New()
-	e.Debug = true
-	e.Logger.SetLevel(log.DEBUG)
+	e.Debug = false
+	e.Logger.SetOutput(ioutil.Discard)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -332,13 +332,6 @@ func postInitialize(c echo.Context) error {
 	if err != nil {
 		c.Logger().Errorf("db error : %v", err)
 		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	userAgent := c.Request().Header.Get("User-Agent")
-	if strings.Contains(strings.ToLower(userAgent), "benchmark") {
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu1", "bench_started.sh")
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu2", "bench_started.sh")
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu3", "bench_started.sh")
 	}
 
 	return c.JSON(http.StatusOK, InitializeResponse{
