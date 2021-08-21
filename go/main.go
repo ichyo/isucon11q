@@ -789,6 +789,7 @@ func getIsuGraph(c echo.Context) error {
 		imsTime, err := http.ParseTime(ims)
 		if err == nil {
 			if !lastUpdate.After(imsTime) {
+				c.Response().Header().Set("Content-Type", "application/json")
 				return c.NoContent(304)
 			}
 		}
