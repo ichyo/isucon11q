@@ -762,7 +762,7 @@ func getIsuGraph(c echo.Context) error {
 	log.Infof("!!! %v", c.Request().Header)
 
 	var lastUpdate time.Time
-	err = db.Select(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
+	err = db.Get(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
