@@ -1106,6 +1106,11 @@ func getTrend(c echo.Context) error {
 
 	res := []TrendResponse{}
 
+	type SIsuCondition struct {
+		Timestamp time.Time `db:"timestamp"`
+		Condition string    `db:"condition"`
+	}
+
 	for _, character := range characterList {
 		isuList := []Isu{}
 		err = db.Select(&isuList,
@@ -1121,9 +1126,9 @@ func getTrend(c echo.Context) error {
 		characterWarningIsuConditions := []*TrendCondition{}
 		characterCriticalIsuConditions := []*TrendCondition{}
 		for _, isu := range isuList {
-			conditions := []IsuCondition{}
+			conditions := []SIsuCondition{}
 			err = db.Select(&conditions,
-				"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY timestamp DESC LIMIT 1",
+				"SELECT timestamp, condition FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY timestamp DESC LIMIT 1",
 				isu.JIAIsuUUID,
 			)
 			if err != nil {
