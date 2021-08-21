@@ -334,13 +334,6 @@ func postInitialize(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	userAgent := c.Request().Header.Get("User-Agent")
-	if strings.Contains(strings.ToLower(userAgent), "benchmark") {
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu1", "bench_started.sh")
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu2", "bench_started.sh")
-		execCommandBackground("ssh", "-o", "StrictHostKeyChecking=no", "isu3", "bench_started.sh")
-	}
-
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
