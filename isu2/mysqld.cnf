@@ -141,7 +141,6 @@ log-queries-not-using-indexes = 1
 # END ANSIBLE MANAGED BLOCK
 #
 [mysqld]
-innodb_dedicated_server=1 # if MySQL 8
 innodb_buffer_pool_size=2792M
 innodb_log_file_size=512M
 innodb_flush_method=O_DIRECT_NO_FSYNC
