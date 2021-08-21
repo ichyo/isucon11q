@@ -1128,7 +1128,7 @@ func getTrend(c echo.Context) error {
 
 		conditions := []IsuCondition{}
 		err = db.Select(&conditions, `
-        SELECT isu_condition.*, isu.id FROM isu_condition
+        SELECT isu_condition.* FROM isu_condition
         INNER JOIN isu ON isu_condition.jia_isu_uuid = isu.jia_isu_uuid
         WHERE isu.character = ? AND (isu_condition.jia_isu_uuid, timestamp) IN (SELECT jia_isu_uuid, MAX(timestamp) FROM isu_condition GROUP BY jia_isu_uuid)
         `)
