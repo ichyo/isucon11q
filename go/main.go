@@ -210,8 +210,8 @@ func init() {
 
 func main() {
 	e := echo.New()
-	e.Debug = true
-	e.Logger.SetLevel(log.ERROR)
+	e.Debug = false
+	e.Logger.SetOutput(ioutil.Discard)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
