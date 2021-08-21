@@ -748,14 +748,6 @@ func getIsuGraph(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	var currentTime time.Time
-	err = db.Get(&currentTime, "SELECT MAX(timestamp) FROM isu_condition")
-	if err != nil {
-		c.Logger().Errorf("!!! db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	currentTime.Truncate(time.Hour)
-
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 	datetimeStr := c.QueryParam("datetime")
 	if datetimeStr == "" {
@@ -766,6 +758,14 @@ func getIsuGraph(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad format: datetime")
 	}
 	date := time.Unix(datetimeInt64, 0).Truncate(time.Hour)
+
+	log.Infof("!!! %v", c.Request().Header)
+
+	var lastUpdate time.Time
+	err = db.Select(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "bad format: datetime")
+	}
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -797,9 +797,7 @@ func getIsuGraph(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	if currentTime.After(date) {
-		c.Response().Header().Set("Cache-Control", "max-age=31536000, immutable")
-	}
+	c.Response().Header().Set("Last-Modified", lastUpdate.UTC().Format(http.TimeFormat))
 
 	return c.JSON(http.StatusOK, res)
 }
