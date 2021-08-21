@@ -759,23 +759,6 @@ func getIsuGraph(c echo.Context) error {
 	}
 	date := time.Unix(datetimeInt64, 0).Truncate(time.Hour)
 
-	var lastUpdate *time.Time
-	err = db.Get(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		// ignoring
-	}
-
-	if lastUpdate != nil {
-		ims := c.Request().Header.Get("if-modified-since")
-		imsTime, err := http.ParseTime(ims)
-		if err == nil {
-			if !lastUpdate.After(imsTime) {
-				return c.NoContent(304)
-			}
-		}
-	}
-
 	tx, err := db.Beginx()
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
@@ -792,6 +775,23 @@ func getIsuGraph(c echo.Context) error {
 	}
 	if count == 0 {
 		return c.String(http.StatusNotFound, "not found: isu")
+
+	}
+	var lastUpdate *time.Time
+	err = tx.Get(&lastUpdate, "SELECT MAX(timestamp) FROM isu_condition WHERE jia_isu_uuid = ?", jiaIsuUUID)
+	if err != nil {
+		c.Logger().Errorf("db error: %v", err)
+		// ignoring
+	}
+
+	if lastUpdate != nil {
+		ims := c.Request().Header.Get("if-modified-since")
+		imsTime, err := http.ParseTime(ims)
+		if err == nil {
+			if !lastUpdate.After(imsTime) {
+				return c.NoContent(304)
+			}
+		}
 	}
 
 	res, err := generateIsuGraphResponse(tx, jiaIsuUUID, date)
