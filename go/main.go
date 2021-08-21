@@ -748,6 +748,15 @@ func getIsuGraph(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	dateHeaderStr := c.Request().Header.Get("Date")
+	requestDate, err := http.ParseTime(dateHeaderStr)
+	if err != nil {
+		c.Logger().Errorf("!!! error: %v", err)
+		c.Logger().Errorf("!!! header: %v", c.Request().Header)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	requestDate = requestDate.Truncate(time.Hour)
+
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 	datetimeStr := c.QueryParam("datetime")
 	if datetimeStr == "" {
@@ -787,6 +796,10 @@ func getIsuGraph(c echo.Context) error {
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	if requestDate.After(date) {
+		c.Response().Header().Set("Cache-Control", "max-age=31536000, immutable")
 	}
 
 	return c.JSON(http.StatusOK, res)
