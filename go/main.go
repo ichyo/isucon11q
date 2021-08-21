@@ -768,6 +768,14 @@ func getIsuGraph(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	ims := c.Request().Header.Get("if-modified-since")
+	imsTime, err := http.ParseTime(ims)
+	if err != nil {
+		if !lastUpdate.After(imsTime) {
+			return c.NoContent(304)
+		}
+	}
+
 	tx, err := db.Beginx()
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
@@ -798,7 +806,7 @@ func getIsuGraph(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Response().Header().Set("Last-Modified", lastUpdate.UTC().Format(http.TimeFormat))
+	c.Response().Header().Set("last-modified", lastUpdate.UTC().Format(http.TimeFormat))
 
 	return c.JSON(http.StatusOK, res)
 }
