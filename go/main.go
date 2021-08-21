@@ -770,7 +770,7 @@ func getIsuGraph(c echo.Context) error {
 
 	ims := c.Request().Header.Get("if-modified-since")
 	imsTime, err := http.ParseTime(ims)
-	if err != nil {
+	if err == nil {
 		c.Logger().Infof("!!! lastUpdate: %v, imsTime: %v", lastUpdate, imsTime)
 		if !lastUpdate.After(imsTime) {
 			return c.NoContent(304)
